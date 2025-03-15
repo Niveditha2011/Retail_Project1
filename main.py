@@ -45,7 +45,9 @@ ques_options = ["select a Question",
             "15. Calculate Total discount percent per sub category",
             "16. Top 10 region wise highest sold products",
             "17. United States in kentucky state how many furniture sold",
-            "18. Find the Profit percentage per Sub_Category"]
+            "18. Find the Profit percentage per Sub_Category",
+            "19. Determine the average discount given per country in consumer segment",
+            "20. List Top 10 highest order placed city"]
 
 st.sidebar.image(r"C:\Users\Python Class\Retail_Project\image\download.jpg")
 sel_option = st.sidebar.selectbox("SQL QUESTIONS",ques_options,index=0) 
@@ -255,18 +257,18 @@ elif sel_option == '12. Total sale price per each sub category':
         GROUP BY df1.sub_category
         ORDER BY total_saleprice DESC""")
     result = mycursor.fetchall()  
-    df = pd.DataFrame(result, columns=["Product Sub-Category", "Total Price"])
+    df = pd.DataFrame(result, columns=["Product Sub-Category", "Total SalePrice"])
     st.write("### Total sale price per each sub category")
     st.dataframe(df)
     
-    chart_data = pd.DataFrame(df, columns=["Product Category", "Average Sale Price"]).set_index("Product Category")
+    chart_data = pd.DataFrame(df, columns=["Product Sub-Category", "Total SalePrice"]).set_index("Product Sub-Category")
     if st.sidebar.button("Generate plot"):
         fig, ax = plt.subplots(figsize=(6,4))
         #st.bar_chart(chart_data)
-        ax.plot(df["Product Category"], df["Average Sale Price"], marker='o', linestyle='-')
-        ax.set_xlabel("Product Category")
-        ax.set_ylabel("Average Sale Price")
-        ax.set_title("Average sale price per Product Category")
+        ax.plot(df["Product Sub-Category"], df["Total SalePrice"], marker='o', linestyle='-')
+        ax.set_xlabel("Product Sub-Category")
+        ax.set_ylabel("Total SalePrice")
+        ax.set_title("Total sale price per each sub category")
         plt.xticks(rotation=45)
         st.pyplot(fig)
 
@@ -283,9 +285,6 @@ elif sel_option == '13. Identify the top 3 category with the highest quantity of
     df = pd.DataFrame(result, columns=["Product Sub-Category", "Total Price"])
     st.write("### Top 3 category with the highest quantity of orders")
     st.dataframe(df)
-    chart_data = pd.DataFrame(df, columns=["Product Sub-Category", "Total Price"]).set_index("Product Sub-Category")
-    if st.sidebar.button("Generate plot"):
-        st.bar_chart(chart_data)
 
 #14
 elif sel_option == '14. Count of top 10 total products from each city':
@@ -331,23 +330,23 @@ elif sel_option == '15. Calculate Total discount percent per sub category':
 #16  
 elif sel_option == '16. Top 10 region wise highest sold products':
     mycursor.execute(
-        """SELECT df2.product_id,df1.region, SUM(df2.quantity) AS TOTAL_QUATITY
+        """SELECT df2.product_id,df1.region, SUM(df2.quantity) AS TOTAL_QUANTITY
         FROM RETAIL_PROJECT.ORDER1 df1
         LEFT JOIN RETAIL_PROJECT.ORDER2 df2 ON df1.order_id = df2.order_id
         GROUP BY df1.region,df2.product_id
-        ORDER BY TOTAL_QUATITY DESC
+        ORDER BY TOTAL_QUANTITY DESC
         LIMIT 10""")
     result = mycursor.fetchall()  
-    df = pd.DataFrame(result, columns=["Product Id", "Region","TOTAL_QUATITY"])
+    df = pd.DataFrame(result, columns=["Product Id", "Region","TOTAL_QUANTITY"])
     st.write('### Top 10 region wise highest sold products')
     st.dataframe(df)
 
-    chart_data = pd.DataFrame(df, columns=["Product Id", "TOTAL_QUATITY"]).set_index("Product Id")
+    chart_data = pd.DataFrame(df, columns=["Product Id", "TOTAL_QUANTITY"]).set_index("Product Id")
     if st.sidebar.button("Generate plot"):
         fig, ax = plt.subplots(figsize=(6,4))
-        ax.plot(df["Product Id"], df["TOTAL_QUATITY"], marker='o', linestyle='-')
+        ax.plot(df["Product Id"], df["TOTAL_QUANTITY"], marker='o', linestyle='-')
         ax.set_xlabel("Product Id")
-        ax.set_ylabel("TOTAL_QUATITY")
+        ax.set_ylabel("TOTAL_QUANTITY")
         ax.set_title("Top 10 region wise highest sold products")
         plt.xticks(rotation=45)
         st.pyplot(fig)
@@ -384,7 +383,40 @@ elif sel_option == '18. Find the Profit percentage per Sub_Category':
         st.bar_chart(chart_data)
 
 #19
-elif sel_option == '':
+elif sel_option == '19. Determine the average discount given per country in consumer segment':
+    mycursor.execute(
+        """SELECT df1.segment,df1.country,AVG(df2.discount) AS Discount
+        FROM RETAIL_PROJECT.ORDER1 df1
+        INNER JOIN RETAIL_PROJECT.ORDER2 df2 ON df1.order_id = df2.order_id  
+        WHERE df1.segment="Consumer"
+        GROUP BY df1.country
+        ORDER BY Discount DESC
+        """)
+    result = mycursor.fetchall()  
+    df = pd.DataFrame(result, columns=["Segment","Country","Discount"])
+    st.write('### Average discount given per country in consumer segment')
+    st.dataframe(df)
 
-
+#20
+elif sel_option == '20. List Top 10 highest order placed city':
+    mycursor.execute(
+        """SELECT df1.city,SUM(df2.quantity) AS Total_Quantity
+        FROM RETAIL_PROJECT.ORDER1 df1
+        JOIN RETAIL_PROJECT.ORDER2 df2 ON df1.order_id = df2.order_id   
+        GROUP BY df1.city
+        ORDER BY Total_Quantity DESC
+        LIMIT 10""")
+    result = mycursor.fetchall()  
+    df = pd.DataFrame(result, columns=["City","Total_Quantity"])
+    st.write('### Top 10 highest order placed city')
+    st.dataframe(df)
+    chart_data = pd.DataFrame(df, columns=["City","Total_Quantity"]).set_index("City")
+    if st.sidebar.button("Generate plot"):
+        fig, ax = plt.subplots(figsize=(6,4))
+        ax.plot(df["City"], df["Total_Quantity"], marker='o', linestyle='-')
+        ax.set_xlabel("City")
+        ax.set_ylabel("Total_Quantity")
+        ax.set_title("Top 10 highest order placed city")
+        plt.xticks(rotation=45)
+        st.pyplot(fig)
 

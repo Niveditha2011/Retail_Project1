@@ -383,4 +383,8 @@ elif sel_option == '18. Find the Profit percentage per Sub_Category':
     if st.sidebar.button("Generate plot"):
         st.bar_chart(chart_data)
 
+#19
+elif sel_option == '':
+
+
 
